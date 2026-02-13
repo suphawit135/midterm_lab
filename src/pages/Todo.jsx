@@ -9,27 +9,38 @@ import Todolist from "../components/Todolist"
 function Todo() {
 
     const [user, setUser] = React.useState([])
-    const [listcontent,setListContent] = React.useState({
-        content:""
+    const [listcontent, setListContent] = React.useState({
+        content: ""
     })
     const token = useUserStore((state) => state.token)
 
     const hdlSubmit = async (evt) => {
         evt.preventDefault()
-        await axios.post("https://drive-accessible-pictures-send.trycloudflare.com/todosv2",listcontent,{
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    },
-                })
+        await axios.post("https://drive-accessible-pictures-send.trycloudflare.com/todosv2", listcontent, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
         fetchUser()
     }
 
-    const hdlClick = (id) => {
-        console.log(id.target.id)
+    const hdlDeleteClick = async (evt) => {
+
+        await axios.delete(`https://drive-accessible-pictures-send.trycloudflare.com/todosv2/delete/${evt.target.id}`
+            , {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+        fetchUser()
     }
 
-    const hdlChange = (evt)=>{
-        setListContent({content:evt.target.value})
+    // const hdlDeleteClick = (id) => {
+    //     console.log(id.target.id)
+    // }
+
+    const hdlChange = (evt) => {
+        setListContent({ content: evt.target.value })
     }
 
 
@@ -76,7 +87,7 @@ function Todo() {
                                 </div>
                                 <div className="flex gap-5">
                                     <button className="bg-amber-200 text-black">Edit</button>
-                                    <p className="text-red-500" id={item.id}  onClick={hdlClick} >X</p>
+                                    <p className="text-red-500" id={item.id} onClick={hdlDeleteClick} >X</p>
                                 </div>
 
                             </div>
