@@ -2,6 +2,7 @@ import axios from "axios"
 import React from "react"
 import useUserStore from "../stores/useStore"
 import { useNavigate } from "react-router"
+import { loginValidator } from "../validators/login.validators"
 
 
 
@@ -12,16 +13,28 @@ function Login(){
         password:""
     })
 
+    const [error,setError] = React.useState({})
+
     const setToken = useUserStore((state)=>state.setToken)
     const navigate=useNavigate()
     
     
     const hdlSubmit = async (evt)=>{
         evt.preventDefault()
+        const result = loginValidator.safeParse(formLogin)
+        if(!result.success){
+            const {fieldErrors} = result.error.flatten()
+            console.log(fieldErrors)
+            setError(fieldErrors)
+            return
+        }
+
+
+
         const res = await axios.post("https://drive-accessible-pictures-send.trycloudflare.com/auth/login",formLogin)
         console.log(res.data.user.token)
         setToken(res.data.user.token)
-        
+        navigate("/todo")
 
     }
     
@@ -46,6 +59,7 @@ function Login(){
                         value={formLogin.username}
                         onChange={hdlChange}>
                         </input>
+                        {error.username&&<p className="text-red-500">{error.username[0]}</p>}
                     <label>Password</label>
                         <input 
                         type="text"
@@ -54,6 +68,8 @@ function Login(){
                         value={formLogin.password}
                         onChange={hdlChange}>
                         </input>
+                        {error.password&&<p className="text-red-500">{error.password[0]}</p>}
+
                     <button className="bg-gray-500 ">Login</button>
                 </form>
 

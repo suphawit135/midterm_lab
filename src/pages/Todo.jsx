@@ -2,6 +2,7 @@ import axios from "axios"
 import useUserStore from "../stores/useStore"
 import React, { useEffect } from "react"
 import Todolist from "../components/Todolist"
+import { todoValidator } from "../validators/todo.validators"
 
 
 
@@ -12,10 +13,26 @@ function Todo() {
     const [listcontent, setListContent] = React.useState({
         content: ""
     })
+    const [checklist, setChecklist] = React.useState({
+        isdone: ""
+    })
+
+    const [error,setError] = React.useState({})
+
     const token = useUserStore((state) => state.token)
 
     const hdlSubmit = async (evt) => {
         evt.preventDefault()
+
+         const result = todoValidator.safeParse(listcontent)
+                if(!result.success){
+                    const {fieldErrors} = result.error.flatten()
+                    console.log(fieldErrors)
+                    setError(fieldErrors)
+                    return
+                }
+
+
         await axios.post("https://drive-accessible-pictures-send.trycloudflare.com/todosv2", listcontent, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -35,12 +52,15 @@ function Todo() {
         fetchUser()
     }
 
-    // const hdlDeleteClick = (id) => {
-    //     console.log(id.target.id)
-    // }
 
     const hdlChange = (evt) => {
         setListContent({ content: evt.target.value })
+    }
+
+    const hdlCheckChange = (evt) =>{
+        setChecklist({isdone: evt.target.checked})
+        console.log(checklist)
+        console.log(evt.target.id)
     }
 
 
@@ -76,13 +96,14 @@ function Todo() {
 
                     <form className="flex justify-between" onSubmit={hdlSubmit}>
                         <input type="text" placeholder="new task" name="content" value={listcontent.content} onChange={hdlChange} />
+                        {error.content&&<p className="text-red-500">{error.content[0]}</p>}
                         <button>Add</button>
                     </form>
                     <div>
                         {user.map((item) => (<div>
                             <div className="flex justify-between">
                                 <div className="flex gap-3">
-                                    <input type="checkbox" />
+                                    <input type="checkbox" onChange={hdlCheckChange} id={item.id} />
                                     <p>{item.content}</p>
                                 </div>
                                 <div className="flex gap-5">
