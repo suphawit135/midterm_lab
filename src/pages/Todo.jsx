@@ -57,10 +57,16 @@ function Todo() {
         setListContent({ content: evt.target.value })
     }
 
-    const hdlCheckChange = (evt) =>{
+    const hdlCheckChange = async (evt) =>{
         setChecklist({isdone: evt.target.checked})
         console.log(checklist)
-        console.log(evt.target.id)
+        await axios.patch(`https://drive-accessible-pictures-send.trycloudflare.com/todosv2/update/${evt.target.id}`,checklist
+            , {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+        fetchUser()
     }
 
 
